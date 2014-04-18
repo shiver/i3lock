@@ -77,7 +77,7 @@ bool tile = false;
 bool ignore_empty_password = false;
 bool skip_repeated_empty_password = false;
 
-bool gaussian_blur = false;
+bool blur = false;
 
 /* isutf, u8_dec © 2005 Jeff Bezanson, public domain */
 #define isutf(c) (((c) & 0xC0) != 0x80)
@@ -684,14 +684,14 @@ int main(int argc, char *argv[]) {
         {"tiling", no_argument, NULL, 't'},
         {"ignore-empty-password", no_argument, NULL, 'e'},
         {"inactivity-timeout", required_argument, NULL, 'I'},
-        {"blur", required_argument, NULL, 'g'},
+        {"blur", no_argument, NULL, 'g'},
         {NULL, no_argument, NULL, 0}
     };
 
     if ((username = getenv("USER")) == NULL)
         errx(EXIT_FAILURE, "USER environment variable not set, please set it.\n");
 
-    char *optstring = "hvnbdc:p:ui:teIg:";
+    char *optstring = "hvnbgdc:p:ui:teI:";
     while ((o = getopt_long(argc, argv, optstring, longopts, &optind)) != -1) {
         switch (o) {
         case 'v':
@@ -748,6 +748,9 @@ int main(int argc, char *argv[]) {
         case 0:
             if (strcmp(longopts[optind].name, "debug") == 0)
                 debug_mode = true;
+            break;
+        case 'g':
+            blur = true;
             break;
         default:
             errx(EXIT_FAILURE, "Syntax: i3lock [-v] [-n] [-b] [-d] [-c color] [-u] [-p win|default]"
@@ -823,10 +826,29 @@ int main(int argc, char *argv[]) {
             fprintf(stderr, "Could not load image \"%s\": %s\n",
                     image_path, cairo_status_to_string(cairo_surface_status(img)));
             img = NULL;
-        } else {
-            blur_image_surface(img, 10005);
-        }
+        }    
     } 
+
+    xcb_pixmap_t blur_pixmap;
+    if (blur) {
+        if (!img) {
+            xcb_visualtype_t *vistype = get_root_visual_type(screen);
+            /* Capture the current screen contents into an XCB surface buffer */
+            blur_pixmap = capture_bg_pixmap(conn, screen, last_resolution);
+            cairo_surface_t *xcb_img = cairo_xcb_surface_create(conn, 
+                blur_pixmap, vistype, last_resolution[0], last_resolution[1]);
+
+            /* The placeholder blur function currently needs a cairo image
+             * surface, so we have to copy our screen onto that first */
+            img = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 
+                                       last_resolution[0], last_resolution[1]);
+            cairo_t *ctx = cairo_create(img);
+            cairo_set_source_surface(ctx, xcb_img, 0, 0);
+            cairo_paint(ctx);
+        }
+
+        blur_image_surface(img, 1005);
+    }
 
     /* Pixmap on which the image is rendered to (if any) */
     xcb_pixmap_t bg_pixmap = draw_image(last_resolution);
@@ -834,6 +856,8 @@ int main(int argc, char *argv[]) {
     /* open the fullscreen window, already with the correct pixmap in place */
     win = open_fullscreen_window(conn, screen, color, bg_pixmap);
     xcb_free_pixmap(conn, bg_pixmap);
+    if (blur_pixmap)
+        xcb_free_pixmap(conn, blur_pixmap);
 
     pid_t pid = fork();
     /* The pid == -1 case is intentionally ignored here:

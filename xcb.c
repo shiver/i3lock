@@ -9,6 +9,7 @@
  */
 #include <xcb/xcb.h>
 #include <xcb/xcb_image.h>
+#include <xcb/xcb_pixel.h>
 #include <xcb/xcb_atom.h>
 #include <xcb/dpms.h>
 #include <stdio.h>
@@ -96,6 +97,23 @@ xcb_pixmap_t create_bg_pixmap(xcb_connection_t *conn, xcb_screen_t *scr, u_int32
     xcb_poly_fill_rectangle(conn, bg_pixmap, gc, 1, &rect);
     xcb_free_gc(conn, gc);
 
+    return bg_pixmap;
+}
+
+xcb_pixmap_t capture_bg_pixmap(xcb_connection_t *conn, xcb_screen_t *scr, 
+                               u_int32_t* resolution) {
+    xcb_pixmap_t bg_pixmap = xcb_generate_id(conn);
+
+    xcb_create_pixmap(conn, scr->root_depth, bg_pixmap, scr->root,
+                      resolution[0], resolution[1]);
+    xcb_gcontext_t gc = xcb_generate_id(conn);
+    uint32_t values[] = { scr->black_pixel };
+    xcb_create_gc(conn, gc, bg_pixmap, XCB_GC_BACKGROUND, values);
+    xcb_void_cookie_t cookie = xcb_copy_area(conn, scr->root, bg_pixmap, gc,
+                                             0, 0, 0, 0, resolution[0],
+                                             resolution[1]);
+    xcb_flush(conn);
+    xcb_free_gc(conn, gc);
     return bg_pixmap;
 }
 
