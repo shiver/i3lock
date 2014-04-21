@@ -847,7 +847,7 @@ int main(int argc, char *argv[]) {
             cairo_paint(ctx);
         }
 
-        blur_image_surface(img, 1005);
+        blur_image_surface(img, 10000);
     }
 
     /* Pixmap on which the image is rendered to (if any) */
