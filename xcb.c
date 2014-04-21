@@ -109,9 +109,8 @@ xcb_pixmap_t capture_bg_pixmap(xcb_connection_t *conn, xcb_screen_t *scr,
     xcb_gcontext_t gc = xcb_generate_id(conn);
     uint32_t values[] = { scr->black_pixel };
     xcb_create_gc(conn, gc, bg_pixmap, XCB_GC_BACKGROUND, values);
-    xcb_void_cookie_t cookie = xcb_copy_area(conn, scr->root, bg_pixmap, gc,
-                                             0, 0, 0, 0, resolution[0],
-                                             resolution[1]);
+    xcb_copy_area(conn, scr->root, bg_pixmap, gc, 0, 0, 0, 0, 
+                  resolution[0], resolution[1]);
     xcb_flush(conn);
     xcb_free_gc(conn, gc);
     return bg_pixmap;
