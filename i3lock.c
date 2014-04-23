@@ -846,8 +846,8 @@ int main(int argc, char *argv[]) {
             cairo_set_source_surface(ctx, xcb_img, 0, 0);
             cairo_paint(ctx);
 
-            cairo_surface_destroy(xcb_img);
             cairo_destroy(ctx);
+            cairo_surface_destroy(xcb_img);
         }
 
         blur_image_surface(img, 10000);
