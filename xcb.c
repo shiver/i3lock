@@ -107,8 +107,8 @@ xcb_pixmap_t capture_bg_pixmap(xcb_connection_t *conn, xcb_screen_t *scr,
     xcb_create_pixmap(conn, scr->root_depth, bg_pixmap, scr->root,
                       resolution[0], resolution[1]);
     xcb_gcontext_t gc = xcb_generate_id(conn);
-    uint32_t values[] = { scr->black_pixel };
-    xcb_create_gc(conn, gc, bg_pixmap, XCB_GC_BACKGROUND, values);
+    uint32_t values[] = { 0 };
+    xcb_create_gc(conn, gc, bg_pixmap, XCB_GC_SUBWINDOW_MODE, values);
     xcb_copy_area(conn, scr->root, bg_pixmap, gc, 0, 0, 0, 0, 
                   resolution[0], resolution[1]);
     xcb_flush(conn);

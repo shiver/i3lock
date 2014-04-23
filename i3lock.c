@@ -851,6 +851,7 @@ int main(int argc, char *argv[]) {
         }
 
         blur_image_surface(img, 10000);
+        //stack_blur_image_surface(img, 20);
     }
 
     /* Pixmap on which the image is rendered to (if any) */
