@@ -29,6 +29,7 @@ i3lock \- improved screen locker
 .RB [\|\-u\|]
 .RB [\|\-e\|]
 .RB [\|\-I\|]
+.RB [\|\-g\|]
 
 .SH DESCRIPTION
 .B i3lock
@@ -114,6 +115,12 @@ and, if invalid, the user will have to wait a few seconds before
 another try. This can be useful if the XF86ScreenSaver key is used to
 put a laptop to sleep and bounce on resume or if you happen to wake up
 your computer with the enter key.
+
+.TP
+.B \-g, \-\-blur
+Blurs the background. Used alone this will attempt to capture the entire screen
+contents and blur it. However, this may also be used in conjunction with both
+a loaded image file and the tiling option.
 
 .SH SEE ALSO
 .IR xautolock(1)
