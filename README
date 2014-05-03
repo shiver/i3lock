@@ -30,6 +30,8 @@ Requirements
 - libx11-xcb-dev
 - libxkbfile-dev
 - libxkbcommon >= 0.2.0
+- libxcb-dpms-dev
+- libxcb-image-dev
 
 Running i3lock
 -------------
